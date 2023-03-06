@@ -1,0 +1,48 @@
+# Contributor: Andres Almiray <aalmiray@yahoo.com>
+# Maintainer: Andres Almiray <aalmiray@yahoo.com>
+pkgname=jreleaser
+pkgver=1.5.0
+pkgrel=0
+pkgdesc="Release projects quickly and easily with JReleaser"
+url="https://jreleaser.org/"
+# riscv64 blocked by openjdk8/java-jdk
+arch="noarch !riscv64"
+# binary distribution without tests
+options="!check"
+license="Apache-2.0"
+source="https://github.com/jreleaser/jreleaser/releases/download/v$pkgver/jreleaser-$pkgver.zip"
+
+# largest supported version in community
+case "$CARCH" in
+ppc64le|s390x|arm*|x86)
+	depends="openjdk11-jdk"
+	;;
+*)
+	depends="openjdk17-jdk"
+	;;
+esac
+
+package() {
+	local jreleaserhome="/usr/share/java/$pkgname"
+	local destdir="$pkgdir/$jreleaserhome"
+
+	install -dm755 "$destdir"/bin
+	rm bin/*.bat
+	install -m755 bin/* "$destdir"/bin
+
+	install -dm755 "$pkgdir"/usr/bin
+	ln -sf $jreleaserhome/bin/jreleaser "$pkgdir"/usr/bin/jreleaser
+
+	install -dm755 "$destdir"/lib
+	install -m644 lib/*.jar "$destdir"/lib
+
+    # LICENSE include in lib/jreleaser-$pkgver.jar
+    # added explicitly to distribution in 1.5.0+
+    # see https://github.com/jreleaser/jreleaser/commit/6c7346db5aa2293e6be1ad517a3c985ad56ce846
+	# install -m644 -D LICENSE "$pkgdir"/usr/share/licenses/$pkgname/$file
+}
+
+
+sha512sums="
+8dbc701e4524437be092c1c7341f9706189839c9b7917bcbe460084c321625fd5c54a5c0043522563b6671ee4e8b626571288536e7af527a6db9765bcb1e70a7  jreleaser-1.5.0.zip
+"
